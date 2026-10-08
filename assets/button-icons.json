@@ -1,0 +1,26 @@
+{
+  "format": "BGP1",
+  "width": 256,
+  "height": 256,
+  "button_codes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "localized_letters": 0,
+  "source": "Original Xbox button pixels, not its localized font",
+  "sha256": "a9daf59a2a1a4f7b11d6b4d63bdfcea1ba232374309cfbf5586995a1db929aa4"
+}
