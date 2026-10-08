@@ -20,6 +20,7 @@ enum class HookId {
     lookup_glyph,
     mouse_move,
     remote_move,
+    entity_use,
     handle_pic,
     render_text,
     renderer_release,

@@ -3,6 +3,7 @@
 #include "mw3gf/game/gameplay_profile.hpp"
 #include "mw3gf/game/native_memory.hpp"
 #include "mw3gf/game/native_types.hpp"
+#include "mw3gf/game/use_hold.hpp"
 #include <span>
 namespace mw3gf::game {
 using ReadCharacter = unsigned (*)(const char**, int, int);
@@ -10,6 +11,7 @@ using GameFrame = void (*)(int, float);
 using CreateCmd = void* (*)(void*, int);
 using MouseMove = void (*)(void*, float);
 using RemoteMove = void (*)(int, void*);
+using EntityUse = void (*)(void*, void*);
 using BindingKeys = int (*)(int, const char*, char*);
 using LocalizedText = const char* (*)(const char*);
 using FindAsset = void* (*)(int, const char*, int);
@@ -36,6 +38,7 @@ struct OriginalFunctions {
     LookupGlyph lookup_glyph{};
     MouseMove mouse_move{};
     RemoteMove remote_move{};
+    EntityUse entity_use{};
     HandlePic handle_pic{};
     RenderText render_text{};
     RendererRelease renderer_release{};
@@ -49,6 +52,7 @@ class EngineApi {
     explicit EngineApi(OriginalFunctions& originals);
     [[nodiscard]] std::uintptr_t base() const noexcept { return base_; }
     [[nodiscard]] OriginalFunctions& originals() const noexcept { return originals_; }
+    [[nodiscard]] const UseHoldRule* use_hold_rule(const void* target) const;
     template <class T> [[nodiscard]] T function(std::uintptr_t rva) const noexcept {
         return reinterpret_cast<T>(base_ + rva);
     }
