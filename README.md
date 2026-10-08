@@ -10,9 +10,9 @@
 
 Gamepad controls and Xbox / PlayStation button prompts for the **Call of Duty: Modern Warfare 3 (2011) single-player campaign on PC**. Keeps the PC menus and graphics settings, with controller navigation, analog movement and camera control.
 
-**Version 0.8.4 is a pre-release.** Full campaign verification is ongoing.
+**Version 0.8.5 is a pre-release.** Full campaign verification is ongoing.
 
-Version 0.8.4 fixes the underwater vehicle steering hint so controller mode displays the right-stick icon in place of the mouse field, preserving the game's selected language.
+Version 0.8.5 adds a 250 ms controller hold for ground weapon swapping and pickup, thrown knife recovery, intelligence pickup and breach activation. Eligible hints use Hold instructions from the game's selected language, including weapon hints that omit a Press instruction. Keyboard use keeps its native behavior.
 
 ## In-game preview
 
@@ -30,7 +30,7 @@ Version 0.8.4 fixes the underwater vehicle steering hint so controller mode disp
 ## Install
 
 1. Close the game.
-2. [Download **MW3GamepadFix-0.8.4-ASI.zip**](https://github.com/TheTronuo/MW3GamepadFix/releases/download/v0.8.4/MW3GamepadFix-0.8.4-ASI.zip).
+2. [Download **MW3GamepadFix-0.8.5-ASI.zip**](https://github.com/TheTronuo/MW3GamepadFix/releases/download/v0.8.5/MW3GamepadFix-0.8.5-ASI.zip).
 3. Extract the archive into the game folder containing `iw5sp.exe`. Place `winmm.dll`, `MW3GamepadFix.asi` and `MW3GamepadFix.ini` next to that executable.
 4. Launch single-player normally.
 
