@@ -24,7 +24,7 @@ inline constexpr unsigned frozen_movement = 0x800, frozen_camera = 1, analog_loo
 namespace command {
 inline constexpr unsigned ads_button = 0x800;
 inline constexpr std::size_t buttons = 4, forward = 0x1C, right = 0x1D;
-inline constexpr std::size_t pitch = 0x20, yaw = 0x21, remote_yaw = 0x3E, remote_pitch = 0x3F;
+inline constexpr std::size_t pitch = 0x20, yaw = 0x21, remote_pitch = 0x3E, remote_yaw = 0x3F;
 } // namespace command
 namespace camera {
 inline constexpr unsigned forced_ads_modes = 0x1800;
