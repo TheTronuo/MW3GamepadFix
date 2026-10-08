@@ -12,6 +12,7 @@ using MouseMove = void (*)(void*, float);
 using RemoteMove = void (*)(int, void*);
 using BindingKeys = int (*)(int, const char*, char*);
 using LocalizedText = const char* (*)(const char*);
+using FindAsset = void* (*)(int, const char*, int);
 using LookupGlyph = Glyph* (*)(NativeFont*, unsigned);
 using TextCommand = void* (*)(const char*, int, NativeFont*, float, float, float, float, float, const float*,
                               int, int, bool);
@@ -30,6 +31,7 @@ struct OriginalFunctions {
     CreateCmd create_cmd{};
     BindingKeys binding_keys{};
     LocalizedText localized_text{};
+    FindAsset find_asset{};
     TextCommand text_command{};
     LookupGlyph lookup_glyph{};
     MouseMove mouse_move{};

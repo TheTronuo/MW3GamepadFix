@@ -15,6 +15,7 @@ enum class HookId {
     create_cmd,
     binding_keys,
     localized_text,
+    find_asset,
     text_command,
     lookup_glyph,
     mouse_move,

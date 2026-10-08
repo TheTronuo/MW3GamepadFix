@@ -1,6 +1,7 @@
 #pragma once
 #include "mw3gf/core/gameplay_adapter.hpp"
 #include "mw3gf/game/button_icons.hpp"
+#include "mw3gf/game/hud_prompt.hpp"
 #include "mw3gf/game/runtime_context.hpp"
 #include <atomic>
 #include <map>
@@ -25,6 +26,8 @@ class PromptController {
     void renderer_release() noexcept;
     int binding_keys(int client, const char* command, char* output) noexcept;
     const char* localized(const char* key, const char* original) noexcept;
+    void* hud_localized_asset(int type, const char* key, void* original,
+                              std::uintptr_t caller_rva) noexcept;
     Glyph* glyph(NativeFont* font, unsigned code) noexcept;
     void* text_command(const char* text, int max_chars, NativeFont* font, float x, float y, float xs,
                        float ys, float rotation, const float* color, int style, int cursor,
@@ -40,6 +43,7 @@ class PromptController {
     std::mutex prompt_strings_mutex_;
     std::map<std::pair<std::string, std::string>, std::string> prompt_strings_;
     std::map<std::string, std::string> cached_instructions_;
+    HudPromptCache hud_prompts_;
     bool images_verified_{}, prompt_failed_{};
     ButtonIcons icons_;
 };
