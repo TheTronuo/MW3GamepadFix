@@ -43,6 +43,7 @@ GameplayOutput GameplayAdapter::update(const InputSnapshot& input, bool active) 
     if (!right.x && !right.y)
         right_blocked_ = false;
     if (!left_blocked_) {
+        output.move = left;
         const auto move = xbox_movement(left);
         output.forward = static_cast<std::int8_t>(move.y);
         output.right = static_cast<std::int8_t>(move.x);
