@@ -1,0 +1,3 @@
+Checks: '-*,clang-analyzer-core.*,clang-analyzer-cplusplus.*,bugprone-use-after-move,bugprone-sizeof-expression,performance-unnecessary-copy-initialization,modernize-use-nullptr'
+HeaderFilterRegex: 'mw3gf[/\\]'
+WarningsAsErrors: '*'
