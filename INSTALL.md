@@ -1,7 +1,10 @@
-# MW3GamepadFix 0.8.3
+# MW3GamepadFix 0.8.4
 
 Gamepad support for Call of Duty: Modern Warfare 3 (2011), single-player on 64-bit Windows.
 This is a pre-release; full campaign verification is ongoing.
+
+Version 0.8.4 fixes the underwater vehicle steering hint: the mouse field becomes
+the right-stick icon in controller mode, preserving the selected game language.
 
 ## Install
 

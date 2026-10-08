@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(MW3GamepadFix VERSION 0.8.3 LANGUAGES C CXX RC)
+project(MW3GamepadFix VERSION 0.8.4 LANGUAGES C CXX RC)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if(NOT WIN32 OR NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -65,6 +65,7 @@ set(MW3GF_GAME_SOURCES
     src/game/input_session.cpp
     src/game/runtime_context.cpp
     src/game/prompt_controller.cpp
+    src/game/hud_prompt.cpp
     src/game/gameplay_controller.cpp
     src/game/remote_control.cpp
     src/game/menu_controller.cpp
@@ -121,6 +122,9 @@ if(BUILD_TESTING)
         ARGS $<TARGET_FILE:MW3GamepadFixASI>)
     mw3gf_add_test(mw3gf_gameplay_tests gameplay_adapter
         SOURCES tests/gameplay_adapter_tests.cpp
+        LIBRARIES mw3gf_core)
+    mw3gf_add_test(mw3gf_hud_prompt_tests hud_prompt
+        SOURCES tests/hud_prompt_tests.cpp src/game/hud_prompt.cpp
         LIBRARIES mw3gf_core)
     mw3gf_add_test(mw3gf_camera_tests stick_camera
         SOURCES tests/stick_camera_tests.cpp
