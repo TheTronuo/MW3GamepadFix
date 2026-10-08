@@ -1,5 +1,6 @@
 #include "mw3gf/game/build_profile.hpp"
 #include "mw3gf/game/gameplay_profile.hpp"
+#include "mw3gf/game/use_profile.hpp"
 #include <MinHook.h>
 #include <Windows.h>
 #include <array>
@@ -13,7 +14,7 @@ int main() {
         VirtualAlloc(nullptr, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE));
     if (!page || MH_Initialize() != MH_OK)
         return 1;
-    const std::array<std::array<std::uint8_t, 16>, 9> signatures{
+    const std::array<std::array<std::uint8_t, 16>, 10> signatures{
         mouse_move_prologue,
         remote_move_prologue,
         {0x48, 0x8B, 0xC4, 0x48, 0x81, 0xEC, 0xA8, 0, 0, 0, 0xF3, 0x0F, 0x10, 0x2D, 0xCE, 0x7B},
@@ -22,7 +23,8 @@ int main() {
         register_material_prologue,
         text_width_prologue,
         text_count_prologue,
-        decoded_text_width_prologue};
+        decoded_text_width_prologue,
+        entity_use_prologue};
     bool ok = true;
     for (std::size_t i = 0; i < signatures.size(); ++i) {
         void* target = page + i * 128;
@@ -56,7 +58,7 @@ int main() {
             page[i * 128 + 16] = 0x56;
         }
         void* trampoline{};
-        const auto status = MH_CreateHook(target, page + 1024, &trampoline);
+        const auto status = MH_CreateHook(target, page + 2048, &trampoline);
         if (status != MH_OK || !trampoline) {
             std::cerr << MH_StatusToString(status) << '\n';
             ok = false;

@@ -37,6 +37,7 @@ class PromptController {
     std::optional<int> measured_prompt_width(const char* text, int max_chars, NativeFont* font,
                                              int decode_mode) noexcept;
     bool render_button_text(void* state);
+    std::string instruction(std::string_view key, std::string_view text);
     std::string prompt_text(std::string_view text);
     RuntimeContext& context_;
     std::atomic_bool controller_mode_{};

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(MW3GamepadFix VERSION 0.8.4 LANGUAGES C CXX RC)
+project(MW3GamepadFix VERSION 0.8.5 LANGUAGES C CXX RC)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if(NOT WIN32 OR NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -33,6 +33,7 @@ add_library(mw3gf_core STATIC
     src/core/gameplay_adapter.cpp
     src/core/gameplay_prompts.cpp
     src/core/stick_camera.cpp
+    src/core/use_policy.cpp
 )
 target_include_directories(mw3gf_core PUBLIC include)
 add_library(mw3gf_input STATIC
@@ -68,6 +69,7 @@ set(MW3GF_GAME_SOURCES
     src/game/hud_prompt.cpp
     src/game/gameplay_controller.cpp
     src/game/remote_control.cpp
+    src/game/use_hold.cpp
     src/game/menu_controller.cpp
     src/game/menu_actions.cpp
 )
@@ -131,6 +133,9 @@ if(BUILD_TESTING)
         LIBRARIES mw3gf_core)
     mw3gf_add_test(mw3gf_remote_tests remote_control
         SOURCES tests/remote_control_tests.cpp src/game/remote_control.cpp
+        LIBRARIES mw3gf_core)
+    mw3gf_add_test(mw3gf_use_hold_tests use_hold
+        SOURCES tests/use_hold_tests.cpp src/game/use_hold.cpp src/game/native_memory.cpp
         LIBRARIES mw3gf_core)
     mw3gf_add_test(mw3gf_camera_hook_tests camera_hooks
         SOURCES tests/camera_hook_tests.cpp

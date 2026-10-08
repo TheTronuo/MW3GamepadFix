@@ -16,6 +16,8 @@ class GameplayController {
     void add_movement(void* cmd, int local_client) noexcept;
     void add_camera(void* command, float seconds) noexcept;
     void add_remote_stick(int local_client, void* command) noexcept;
+    void record_use_command(const void* command, int local_client) noexcept;
+    bool defer_use(const void* player, const void* target, std::uintptr_t caller_rva) noexcept;
 
   private:
     void pump_cinematic(const InputSnapshot& input);
@@ -28,6 +30,8 @@ class GameplayController {
     GameplayOutput movement_;
     StickCamera camera_;
     std::atomic_bool release_pending_{};
+    std::atomic_bool controller_use_source_{};
+    UseHold use_hold_;
     bool camera_seen_{}, remote_seen_{}, remote_camera_{};
     bool game_command_seen_{}, gameplay_error_logged_{}, game_frame_seen_{};
 };
