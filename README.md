@@ -2,15 +2,15 @@
 
 | Feature | Status |
 | :--- | :---: |
-| **Xbox / PlayStation button prompts** | Supported |
-| **Menu navigation** | Supported |
-| **Analog movement and camera** | Supported |
-| **Localized game text** | Preserved |
+| **Xbox / PlayStation button prompts** | ✅ Supported |
+| **Menu navigation** | ✅ Supported |
+| **Analog movement and camera** | ✅ Supported |
 | **Game mode** | Single-player |
+| **Game version** | **2.0.15** (x64) |
 
 Gamepad controls and Xbox / PlayStation button prompts for the **Call of Duty: Modern Warfare 3 (2011) single-player campaign on PC**. Keeps the PC menus and graphics settings, with controller navigation, analog movement and camera control.
 
-**Version 0.8.2 is a pre-release.** Full campaign verification is ongoing. Prompt replacement uses the game's original localized text and does not depend on English wording.
+**Version 0.8.2 is a pre-release.** Full campaign verification is ongoing.
 
 ## In-game preview
 
@@ -54,8 +54,6 @@ prompts=x360
 | `prompts` | `x360` for Xbox icons (default), `ps3` for PlayStation icons |
 
 Restart the game after changing settings. Prompt style is independent of the input backend and game language. XInput-compatible controllers work with the default backend. PlayStation controllers need an XInput mapping tool or the GameInput backend; GameInput requires its Microsoft runtime.
-
-Use A / Cross to confirm menu actions and skip skippable startup videos, B / Circle to go back, and the D-pad or left stick to navigate. Gameplay follows the Xbox button layout; Back / View has no gameplay action.
 
 ## Credits
 
