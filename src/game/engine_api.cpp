@@ -19,6 +19,9 @@ EngineApi::EngineApi(OriginalFunctions& originals)
     verify(cinematic_escape_rva, cinematic_escape_prologue, "cinematic_escape");
     verify(mouse_move_rva, mouse_move_prologue, "mouse_move");
     verify(remote_move_rva, remote_move_prologue, "remote_move");
+    verify(entity_use_rva, entity_use_prologue, "entity_use");
+    verify(weapon_class_rva, weapon_class_prologue, "weapon_class");
+    verify(server_config_string_rva, server_config_string_prologue, "server_config_string");
     verify(forced_ads_rva, forced_ads_prologue, "forced_ads");
     verify(menu_paint_rva, menu_prologue, "menu_paint");
     verify(draw_text_rva, draw_text_prologue, "draw_text");
@@ -32,6 +35,10 @@ EngineApi::EngineApi(OriginalFunctions& originals)
     verify(text_width_rva, text_width_prologue, "text_width");
     verify(decoded_text_width_rva, decoded_text_width_prologue, "decoded_text_width");
     verify(text_count_rva, text_count_prologue, "text_count");
+}
+const UseHoldRule* EngineApi::use_hold_rule(const void* target) const {
+    return native_use_hold_rule(target, function<WeaponClass>(weapon_class_rva),
+                               function<ServerConfigString>(server_config_string_rva));
 }
 void EngineApi::verify(std::uintptr_t rva, std::span<const std::uint8_t> signature,
                        std::string_view name) const {

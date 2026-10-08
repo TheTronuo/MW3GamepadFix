@@ -77,6 +77,40 @@ void GameplayController::add_movement(void* cmd, int local_client) noexcept {
         game_command_seen_ = true;
     }
 }
+void GameplayController::record_use_command(const void* command, int local_client) noexcept {
+    if (local_client != 0 || !readable(command, 8))
+        return;
+    try {
+        const bool use = (read_field<unsigned>(command, layout::command::buttons) &
+                          use_layout::usereload) != 0;
+        const auto* button = context_.engine.address(usereload_button_rva);
+        const int first = read_field<int>(button, 0), second = read_field<int>(button, 4);
+        const bool pad_owner = first == controller_use_owner || second == controller_use_owner;
+        const bool other_owner = (first && first != controller_use_owner) ||
+                                 (second && second != controller_use_owner);
+        // Keep the release/impulse tail tagged until a command without use.
+        // An explicitly held keyboard owner continues through the PC path.
+        const bool source = use && !other_owner &&
+                            (pad_owner || controller_use_source_.load(std::memory_order_acquire));
+        use_hold_.record_command(read_field<std::uint32_t>(command, 0), source);
+        if (!use && !pad_owner)
+            controller_use_source_.store(false, std::memory_order_release);
+    } catch (...) {
+    }
+}
+bool GameplayController::defer_use(const void* player, const void* target,
+                                  std::uintptr_t caller_rva) noexcept {
+    if (caller_rva != timed_entity_use_return_rva)
+        return false;
+    try {
+        return use_hold_.defer(
+            player, target, caller_rva, context_.engine.read<std::uint32_t>(server_time_rva),
+            gameplay_active() && context_.input.monitor().snapshot().connected,
+            context_.engine.use_hold_rule(target));
+    } catch (...) {
+        return false;
+    }
+}
 void GameplayController::add_camera(void* command, float seconds) noexcept {
     if (!context_.settings.camera || !command || !gameplay_active() ||
         !context_.input.monitor().snapshot().connected) {
@@ -186,6 +220,8 @@ void GameplayController::dispatch_gameplay(const GameplayOutput& commands) {
         // Native KButton has two owner slots; this nonzero owner is outside
         // keyboard codes, and never indexes the keyboard state array.
         execute(0, action, 0x4000 + static_cast<int>(event.binding));
+        if (binding.control == bit(Button::x) && event.down)
+            controller_use_source_.store(true, std::memory_order_release);
         context_.logger.write("Gameplay action=" + std::to_string(action) + (event.down ? " down" : " up"));
     }
 }

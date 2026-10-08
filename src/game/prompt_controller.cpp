@@ -139,6 +139,22 @@ int PromptController::binding_keys(int client, const char* command, char* output
         return -1;
     }
 }
+std::string PromptController::instruction(std::string_view key, std::string_view text) {
+    std::string converted(text);
+    if (context_.settings.gameplay) {
+        if (const auto* rule = find_use_hold_prompt(key)) {
+            const auto translate = context_.engine.originals().localized_text;
+            std::array<std::string, 2> press, hold;
+            for (std::size_t i = 0; i < press.size(); ++i) {
+                press[i] = safe_string(translate(rule->press_reference_keys[i].data()));
+                hold[i] = safe_string(translate(use_hold_reference_keys[i].data()));
+            }
+            converted = localized_hold_instruction(
+                text, {{press[0], press[1]}, {hold[0], hold[1]}, rule->allow_implicit_prefix});
+        }
+    }
+    return controller_instruction(key, converted);
+}
 const char* PromptController::localized(const char* key, const char* original) noexcept {
     if (!key || !original)
         return original;
@@ -146,7 +162,7 @@ const char* PromptController::localized(const char* key, const char* original) n
         const auto name = safe_string(key), text = safe_string(original);
         if (name.empty() || text.empty())
             return original;
-        const auto replacement = controller_instruction(name, text);
+        const auto replacement = instruction(name, text);
         if (replacement == text)
             return original;
         std::scoped_lock lock(prompt_strings_mutex_);
@@ -169,13 +185,14 @@ void* PromptController::hud_localized_asset(int type, const char* key, void* ori
         return original;
     try {
         const auto name = safe_string(key);
-        if (!is_sdv_hud_lookup(type, name, caller_rva))
+        if (!is_hud_prompt_lookup(type, name, caller_rva) ||
+            (name != sdv_prompt_key && !context_.settings.gameplay))
             return original;
         NativeLocalizeEntry entry{};
         std::memcpy(&entry, original, sizeof(entry));
         const auto text = safe_string(entry.value);
         return const_cast<NativeLocalizeEntry*>(hud_prompts_.lookup(
-            static_cast<NativeLocalizeEntry*>(original), name, text, controller_prompts()));
+            static_cast<NativeLocalizeEntry*>(original), name, text, instruction(name, text)));
     } catch (...) {
         return original;
     }

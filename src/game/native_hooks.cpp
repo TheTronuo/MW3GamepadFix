@@ -32,6 +32,7 @@ void* hooked_create_cmd(void* command, int local_client) {
     void* result = originals.create_cmd(command, local_client);
     if (enabled.load(std::memory_order_acquire))
         runtime->gameplay().add_movement(result, local_client);
+    runtime->gameplay().record_use_command(result, local_client);
     return result;
 }
 void hooked_mouse_move(void* command, float seconds) {
@@ -43,6 +44,14 @@ void hooked_remote_move(int local_client, void* command) {
     originals.remote_move(local_client, command);
     if (enabled.load(std::memory_order_acquire))
         runtime->gameplay().add_remote_stick(local_client, command);
+}
+void hooked_entity_use(void* player, void* target) {
+    const auto caller = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
+    if (enabled.load(std::memory_order_acquire) &&
+        runtime->gameplay().defer_use(player, target,
+                                               caller - runtime->context().engine.base()))
+        return;
+    originals.entity_use(player, target);
 }
 int hooked_binding_keys(int client, const char* command, char* output) {
     if (enabled.load(std::memory_order_acquire)) {
@@ -127,6 +136,7 @@ void install_hooks(ModRuntime& instance) {
     hooks.add(HookId::mouse_move, engine.address(mouse_move_rva), &hooked_mouse_move, originals.mouse_move);
     hooks.add(HookId::remote_move, engine.address(remote_move_rva), &hooked_remote_move,
               originals.remote_move);
+    hooks.add(HookId::entity_use, engine.address(entity_use_rva), &hooked_entity_use, originals.entity_use);
     hooks.add(HookId::handle_pic, engine.address(handle_pic_rva), &hooked_handle_pic, originals.handle_pic);
     hooks.add(HookId::render_text, engine.address(render_text_rva), &hooked_render_text,
               originals.render_text);
