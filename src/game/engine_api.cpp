@@ -12,6 +12,7 @@ EngineApi::EngineApi(OriginalFunctions& originals)
     verify(exec_binding_rva, exec_binding_prologue, "exec_binding");
     verify(binding_keys_rva, binding_keys_prologue, "binding_keys");
     verify(localized_text_rva, localized_text_prologue, "localized_text");
+    verify(find_asset_rva, find_asset_prologue, "find_asset");
     verify(text_command_rva, text_command_prologue, "text_command");
     verify(lookup_glyph_rva, lookup_glyph_prologue, "lookup_glyph");
     verify(ui_activate_rva, ui_activate_prologue, "ui_activate");

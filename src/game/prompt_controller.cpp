@@ -162,6 +162,24 @@ const char* PromptController::localized(const char* key, const char* original) n
         return original;
     }
 }
+void* PromptController::hud_localized_asset(int type, const char* key, void* original,
+                                           std::uintptr_t caller_rva) noexcept {
+    if (!controller_prompts() || type != localize_asset_type || caller_rva != hud_localize_return_rva ||
+        !key || !readable(original, sizeof(NativeLocalizeEntry)))
+        return original;
+    try {
+        const auto name = safe_string(key);
+        if (!is_sdv_hud_lookup(type, name, caller_rva))
+            return original;
+        NativeLocalizeEntry entry{};
+        std::memcpy(&entry, original, sizeof(entry));
+        const auto text = safe_string(entry.value);
+        return const_cast<NativeLocalizeEntry*>(hud_prompts_.lookup(
+            static_cast<NativeLocalizeEntry*>(original), name, text, controller_prompts()));
+    } catch (...) {
+        return original;
+    }
+}
 Glyph* PromptController::glyph(NativeFont* font, unsigned code) noexcept {
     if (controller_prompts() && is_prompt_glyph(code)) {
         try {

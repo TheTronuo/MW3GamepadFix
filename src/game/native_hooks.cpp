@@ -1,5 +1,6 @@
 #include "native_hooks.hpp"
 #include "mw3gf/platform/windows.hpp"
+#include <intrin.h>
 namespace mw3gf::game::detail {
 namespace {
 void hooked_menu_paint(int local_client) {
@@ -54,6 +55,14 @@ int hooked_binding_keys(int client, const char* command, char* output) {
 const char* hooked_localized_text(const char* key) {
     const char* original = originals.localized_text(key);
     return enabled.load(std::memory_order_acquire) ? runtime->prompts().localized(key, original) : original;
+}
+void* hooked_find_asset(int type, const char* key, int flags) {
+    const auto caller = reinterpret_cast<std::uintptr_t>(_ReturnAddress());
+    void* original = originals.find_asset(type, key, flags);
+    if (enabled.load(std::memory_order_acquire) && type == localize_asset_type &&
+        caller == runtime->context().engine.base() + hud_localize_return_rva)
+        return runtime->prompts().hud_localized_asset(type, key, original, hud_localize_return_rva);
+    return original;
 }
 void* hooked_text_command(const char* text, int max_chars, NativeFont* font, float x, float y, float xs,
                           float ys, float rotation, const float* color, int style, int cursor, bool flag) {
@@ -110,6 +119,7 @@ void install_hooks(ModRuntime& instance) {
               originals.binding_keys);
     hooks.add(HookId::localized_text, engine.address(localized_text_rva), &hooked_localized_text,
               originals.localized_text);
+    hooks.add(HookId::find_asset, engine.address(find_asset_rva), &hooked_find_asset, originals.find_asset);
     hooks.add(HookId::text_command, engine.address(text_command_rva), &hooked_text_command,
               originals.text_command);
     hooks.add(HookId::lookup_glyph, engine.address(lookup_glyph_rva), &hooked_lookup_glyph,
