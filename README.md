@@ -10,7 +10,7 @@
 
 Gamepad controls and Xbox / PlayStation button prompts for the **Call of Duty: Modern Warfare 3 (2011) single-player campaign on PC**. Keeps the PC menus and graphics settings, with controller navigation, analog movement and camera control.
 
-**Version 0.8.2 is a pre-release.** Full campaign verification is ongoing.
+**Version 0.8.3 is a pre-release.** Full campaign verification is ongoing.
 
 ## In-game preview
 
@@ -28,7 +28,7 @@ Gamepad controls and Xbox / PlayStation button prompts for the **Call of Duty: M
 ## Install
 
 1. Close the game.
-2. [Download **MW3GamepadFix-0.8.2-ASI.zip**](https://github.com/TheTronuo/MW3GamepadFix/releases/download/v0.8.2/MW3GamepadFix-0.8.2-ASI.zip).
+2. [Download **MW3GamepadFix-0.8.3-ASI.zip**](https://github.com/TheTronuo/MW3GamepadFix/releases/download/v0.8.3/MW3GamepadFix-0.8.3-ASI.zip).
 3. Extract the archive into the game folder containing `iw5sp.exe`. Place `winmm.dll`, `MW3GamepadFix.asi` and `MW3GamepadFix.ini` next to that executable.
 4. Launch single-player normally.
 

@@ -1,4 +1,4 @@
-# MW3GamepadFix 0.8.2
+# MW3GamepadFix 0.8.3
 
 Gamepad support for Call of Duty: Modern Warfare 3 (2011), single-player on 64-bit Windows.
 This is a pre-release; full campaign verification is ongoing.
