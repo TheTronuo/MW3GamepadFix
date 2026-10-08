@@ -36,7 +36,7 @@ struct GameplayOutput {
     std::array<GameplayEvent, 32> events{};
     std::size_t count{};
     std::int8_t forward{}, right{};
-    Stick look{};
+    Stick move{}, look{};
     bool reset_camera{};
 };
 class GameplayAdapter {
