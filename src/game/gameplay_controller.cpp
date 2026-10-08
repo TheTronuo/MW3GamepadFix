@@ -1,5 +1,6 @@
 #include "mw3gf/game/gameplay_controller.hpp"
 #include "mw3gf/game/native_layout.hpp"
+#include "mw3gf/game/remote_control.hpp"
 #include <algorithm>
 #include <cmath>
 namespace mw3gf::game {
@@ -145,17 +146,11 @@ void GameplayController::add_remote_stick(int local_client, void* command) noexc
     if (context_.engine.read<unsigned>(client_state_rva + layout::client::movement_flags) &
         layout::client::frozen_movement)
         return;
-    auto* bytes = static_cast<std::int8_t*>(command);
-    const float y = context_.settings.camera_settings.invert_y ? -movement_.look.y : movement_.look.y;
-    bytes[layout::command::remote_yaw] =
-        merge_movement(bytes[layout::command::remote_yaw],
-                       static_cast<std::int8_t>(std::floor(movement_.look.x * 127 + .5f)));
-    bytes[layout::command::remote_pitch] = merge_movement(
-        bytes[layout::command::remote_pitch], static_cast<std::int8_t>(std::floor(y * 127 + .5f)));
-    if (!remote_seen_ && (movement_.look.x || movement_.look.y)) {
+    add_remote_control(command, movement_.move, movement_.look, context_.settings.camera_settings.invert_y);
+    if (!remote_seen_ && (movement_.look.x || movement_.look.y || movement_.move.x || movement_.move.y)) {
         try {
             context_.logger.write(
-                "Stage 3 remote analog input active: native signed bytes +3E/+3F; ordinary camera bypassed.");
+                "Remote analog input active: Xbox pitch +3E/yaw +3F, both sticks; ordinary camera bypassed.");
         } catch (...) {
         }
         remote_seen_ = true;
