@@ -211,6 +211,44 @@ int main() {
                     "Press &&1 to pick up", "Missing, ambiguous or incompatible templates remain intact");
         require(!find_use_hold_prompt("PLATFORM_RELOAD") && !find_use_hold_prompt(""),
                 "Unrelated prompt keys remain untouched");
+        const HoldTextTemplates compact_russian{
+            russian_retail.press,
+            {"Удерживайте^3 &&1 ^7чтобы лечь", "Удерживайте^3 &&1 ^7чтобы пригибаться."}, true};
+        for (const auto key : {"PLATFORM_SWAPWEAPONS", "PLATFORM_PICKUPNEWWEAPON"}) {
+            const auto original = compact_russian.press[key == std::string_view("PLATFORM_SWAPWEAPONS") ? 0 : 1];
+            const auto compact = localized_weapon_hold_instruction(key, original, compact_russian);
+            require(compact && *compact == "Удерживайте^3 &&1 ^7, чтобы взять" &&
+                        localized_weapon_hold_instruction(key, *compact, compact_russian) == compact &&
+                        controller_instruction(key, *compact) == *compact,
+                    "Russian weapon swap and pickup share short native Hold pickup text and retain &&1");
+            auto displayed = *compact;
+            displayed.replace(displayed.find("&&1"), 3, "X");
+            displayed += " PP90M1";
+            require(displayed == "Удерживайте^3 X ^7, чтобы взять PP90M1",
+                    "Weapon name remains appended by the native caller");
+        }
+        const HoldTextTemplates compact_english{weapon_text.press,
+            {"Hold down^3 &&1 ^7to go prone", "Hold down^3 &&1 ^7to crouch"}, true};
+        require(localized_weapon_hold_instruction("@PLATFORM_SWAPWEAPONS", weapon_text.press[0], compact_english) ==
+                    std::optional<std::string>("Hold down^3 &&1 ^7to pick up"),
+                "English weapon swap copies the pickup action without word matching");
+        const HoldTextTemplates compact_suffix{
+            {"交換するには^3&&1^7を押す", "拾うには^3&&1^7を押す"},
+            {"伏せるには^3&&1^7を長押しする", "しゃがむには^3&&1^7を長押しする"}, true};
+        require(localized_weapon_hold_instruction("PLATFORM_SWAPWEAPONS", compact_suffix.press[0], compact_suffix) ==
+                    std::optional<std::string>("拾うには^3&&1^7を長押しする"),
+                "Compatible post-button Hold translation copies the complete pickup action");
+        auto incompatible_compact = compact_russian;
+        incompatible_compact.hold[1] = "Другая инструкция &&1";
+        auto missing_compact = compact_russian;
+        missing_compact.hold[0] = "SCRIPT_PLATFORM_HINT_HOLDDOWNPRONEKEY";
+        require(!localized_weapon_hold_instruction("PLATFORM_SWAPWEAPONS", compact_russian.press[0], incompatible_compact) &&
+                    !localized_weapon_hold_instruction("PLATFORM_SWAPWEAPONS", compact_russian.press[0], missing_compact) &&
+                    !localized_weapon_hold_instruction("PLATFORM_RELOAD", compact_russian.press[0], compact_russian) &&
+                    !localized_weapon_hold_instruction("SCRIPT_INTELLIGENCE_PICKUP", compact_russian.press[1], compact_russian) &&
+                    !localized_weapon_hold_instruction("PLATFORM_SWAPWEAPONS", "custom &&1", compact_russian) &&
+                    !localized_weapon_hold_instruction("PLATFORM_PICKUPNEWWEAPON", "Press &&1 and &&2", compact_russian),
+                "Missing/incompatible translations, unrelated keys and unknown source text leave the prior policy available");
         std::cout << "Five Use flows: native eligibility, command sources, timing and localized text verified\n";
         return 0;
     } catch (const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }

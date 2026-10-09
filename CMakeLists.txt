@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(MW3GamepadFix VERSION 0.8.5 LANGUAGES C CXX RC)
+project(MW3GamepadFix VERSION 0.8.8 LANGUAGES C CXX RC)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if(NOT WIN32 OR NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -34,6 +34,8 @@ add_library(mw3gf_core STATIC
     src/core/gameplay_prompts.cpp
     src/core/stick_camera.cpp
     src/core/use_policy.cpp
+    src/core/prone_prompt.cpp
+    src/core/mortar_prompt.cpp
 )
 target_include_directories(mw3gf_core PUBLIC include)
 add_library(mw3gf_input STATIC

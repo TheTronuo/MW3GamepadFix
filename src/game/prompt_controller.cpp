@@ -142,6 +142,20 @@ int PromptController::binding_keys(int client, const char* command, char* output
 std::string PromptController::instruction(std::string_view key, std::string_view text) {
     std::string converted(text);
     if (context_.settings.gameplay) {
+        if (is_mortar_prompt(key)) {
+            const auto translate = context_.engine.originals().localized_text;
+            std::array<std::string, 2> press, hold;
+            for (std::size_t i = 0; i < press.size(); ++i) {
+                press[i] = safe_string(translate(mortar_press_reference_keys[i].data()));
+                hold[i] = safe_string(translate(mortar_hold_reference_keys[i].data()));
+            }
+            converted = localized_mortar_instruction(key, text, {{press[0], press[1]}, {hold[0], hold[1]}});
+        }
+        if (is_prone_prompt(key)) {
+            const auto hold = safe_string(
+                context_.engine.originals().localized_text(prone_hold_reference_key.data()));
+            converted = localized_prone_instruction(key, text, hold);
+        }
         if (const auto* rule = find_use_hold_prompt(key)) {
             const auto translate = context_.engine.originals().localized_text;
             std::array<std::string, 2> press, hold;
@@ -151,6 +165,15 @@ std::string PromptController::instruction(std::string_view key, std::string_view
             }
             converted = localized_hold_instruction(
                 text, {{press[0], press[1]}, {hold[0], hold[1]}, rule->allow_implicit_prefix});
+            if (rule->action == UseAction::ground_weapon || rule->action == UseAction::throwing_knife) {
+                std::array<std::string, 2> compact_hold;
+                for (std::size_t i = 0; i < compact_hold.size(); ++i)
+                    compact_hold[i] = safe_string(translate(weapon_hold_reference_keys[i].data()));
+                if (const auto pickup = localized_weapon_hold_instruction(
+                        key, text, {{press[0], press[1]}, {compact_hold[0], compact_hold[1]},
+                                    rule->allow_implicit_prefix}))
+                    converted = *pickup;
+            }
         }
     }
     return controller_instruction(key, converted);

@@ -1,11 +1,15 @@
-# MW3GamepadFix 0.8.5
+# MW3GamepadFix 0.8.8
 
 Gamepad support for Call of Duty: Modern Warfare 3 (2011), single-player on 64-bit Windows.
 This is a pre-release; full campaign verification is ongoing.
 
-Version 0.8.5 adds a 250 ms controller hold for ground weapon swapping and pickup,
-thrown knife recovery, intelligence pickup and breach activation. Eligible hints
-use the game's localized Hold instructions. Keyboard use retains its native behavior.
+Version 0.8.8 corrects the mortar entry hint to Press, matching its immediate input.
+It uses a shorter localized Hold pickup instruction for both weapon
+pickup and swapping when the game's translation templates are compatible.
+It also displays the game's localized Hold instruction for controller prone
+hints in Warlord, Prague, Castle and the shared prone templates. It also includes
+the 250 ms controller hold for weapon pickup, thrown knife recovery, intelligence
+pickup and breach activation introduced in 0.8.5.
 
 ## Install
 

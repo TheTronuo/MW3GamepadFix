@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -31,6 +32,8 @@ struct UseHoldRule {
 [[nodiscard]] const UseHoldRule* find_use_hold_prompt(std::string_view key) noexcept;
 inline constexpr std::array<std::string_view, 2> use_hold_reference_keys{
     "PLATFORM_HOLD_TO_PLANT_EXPLOSIVES", "PLATFORM_HOLD_TO_DEFUSE_EXPLOSIVES"};
+inline constexpr std::array<std::string_view, 2> weapon_hold_reference_keys{
+    "SCRIPT_PLATFORM_HINT_HOLDDOWNPRONEKEY", "SCRIPT_PLATFORM_HINT_HOLDDOWNCROUCHKEY"};
 struct HoldTextTemplates {
     std::array<std::string_view, 2> press;
     std::array<std::string_view, 2> hold;
@@ -40,4 +43,9 @@ struct HoldTextTemplates {
 // action and its button slot remain the target's; no translated words are read.
 [[nodiscard]] std::string localized_hold_instruction(std::string_view original,
                                                       const HoldTextTemplates& templates);
+// Weapon swap and pickup share the localized pickup wording with a compact
+// Hold instruction. Return no override when the locale's templates cannot be
+// combined safely, leaving the existing Hold conversion as the fallback.
+[[nodiscard]] std::optional<std::string> localized_weapon_hold_instruction(
+    std::string_view key, std::string_view original, const HoldTextTemplates& templates);
 } // namespace mw3gf

@@ -1,5 +1,7 @@
 #pragma once
 #include "mw3gf/core/use_policy.hpp"
+#include "mw3gf/core/prone_prompt.hpp"
+#include "mw3gf/core/mortar_prompt.hpp"
 #include <cstdint>
 #include <map>
 #include <mutex>
@@ -18,7 +20,7 @@ inline constexpr std::string_view sdv_prompt_key = "NY_HARBOR_PLATFORM_HINT_DRIV
 [[nodiscard]] inline bool is_hud_prompt_lookup(int type, std::string_view key,
                                               std::uintptr_t caller_rva) noexcept {
     return type == localize_asset_type && caller_rva == hud_localize_return_rva &&
-           (key == sdv_prompt_key || find_use_hold_prompt(key));
+           (key == sdv_prompt_key || find_use_hold_prompt(key) || is_prone_prompt(key) || is_mortar_prompt(key));
 }
 // Private, stable LocalizeEntry views; the database-owned asset is never changed.
 class HudPromptCache {

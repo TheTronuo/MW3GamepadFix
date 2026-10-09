@@ -109,4 +109,23 @@ std::string localized_hold_instruction(std::string_view original, const HoldText
     result += suffix ? hold0->after : target->after;
     return result;
 }
+std::optional<std::string> localized_weapon_hold_instruction(
+    std::string_view key, std::string_view original, const HoldTextTemplates& templates) {
+    key = use_hint_key(key);
+    if (key != weapon_press[0] && key != weapon_press[1])
+        return std::nullopt;
+    const auto target = split_button(original);
+    if (!target)
+        return std::nullopt;
+    const auto pickup = localized_hold_instruction(templates.press[1], templates);
+    if (pickup == templates.press[1] ||
+        (original != templates.press[0] && original != templates.press[1] && original != pickup))
+        return std::nullopt;
+    const auto converted = split_button(pickup);
+    if (!converted)
+        return std::nullopt;
+    // The engine appends the weapon name after this localized instruction.
+    // Keep the caller's input slot and copy the entire pickup action wording.
+    return std::string(converted->before) + std::string(target->button) + std::string(converted->after);
+}
 } // namespace mw3gf

@@ -10,6 +10,57 @@ a97d2bbc7e495e4cf1a3b7e9a021e25b2c7b461d63f2b88d3cfe8782e8dc1023
 
 The executable hash and hook signatures are checked before hooks are enabled. Other executable builds and multiplayer are unsupported. The mod does not patch game files on disk.
 
+## Version 0.8.8
+
+The Warlord mortar entry hint now uses the current locale's Press instruction instead of Hold.
+The script registers one button hint (`WARLORD_HINT_USE_MORTAR`) on the usable mortar and reuses it
+after dismount. Entry follows its trigger immediately; exit waits for release then a fresh Use press;
+fire responds to the attack command. Reloading is part of the firing animation. No other button hint
+was found in this mortar script, or other initializations of this mortar library in the inspected campaign.
+
+Two native Press references and two native Hold references identify the complete instruction before
+or after the button slot. The mortar action, punctuation, encoding and `&&1` parameter are preserved.
+Both regular localization and the direct HUD lookup apply the same narrowly scoped conversion.
+Missing/incompatible templates and already-correct Press text retain the original string. Weapon
+pickup, prone and the timed Use catalog retain their policies. Input behavior itself is unchanged.
+All 17 Release CTest tests pass. Mortar cases cover the Russian retail strings, synthetic English,
+Arabic and Japanese-style templates, prefix/suffix conversion, caller and key isolation, parameter
+retention, idempotence, cache lifetime and fallback behavior. Gameplay verification of the revised
+hint and other language packs is pending.
+
+## Version 0.8.7
+
+Controller weapon swap and pickup prompts share the current locale's weapon pickup action text.
+Compatible native prone/crouch Hold templates supply the shorter instruction. In the installed Russian
+resources this produces `Удерживайте [button], чтобы взять`, followed by the engine's weapon name.
+The original native button parameter, appended weapon name, 250 ms timing and keyboard path are retained.
+Intelligence, breach and other use prompts keep their existing wording. Incompatible or missing compact
+templates fall back to the previous localized Hold policy. No translations are hardcoded or matched by word.
+
+All 17 Release CTest tests pass. The policy and direct HUD cache tests cover actual Russian strings, English, synthetic prefix/suffix
+translations, missing templates, unrelated keys, repeated conversion and native parameter retention.
+This wording is pending gameplay verification; other installed language packs have not been tested.
+
+## Version 0.8.6
+
+Controller prone instructions use the complete current-locale `SCRIPT_PLATFORM_HINT_HOLDDOWNPRONEKEY`
+translation. The ten audited keys cover Castle, Prague, all four Warlord binding variants and four shared
+prone templates. Warlord's four variants describe one scene; the campaign script review identified six
+display contexts across the three missions. Subtitles, crouch, stand-up instructions, blocked messages,
+menu labels and death quotes are excluded.
+
+Both regular localization and the formatter's existing direct localization lookup use this policy.
+Mission instructions receive the stance button icon directly. Parameterized instructions retain `&&1`
+so native formatting still consumes the caller's button argument. No translated words are searched or
+spliced; text order, encoding and colors come from the native Hold string. Missing or malformed templates
+retain the original instruction. Keyboard mode and disabled gameplay use the original entries.
+
+All 17 Release CTest tests pass. The HUD tests cover all ten keys, input/caller isolation, native argument retention, byte preservation
+for Russian CP1251, English, Arabic and a Japanese-style translation, repeated conversion, unrelated
+messages and pointer lifetime across locale changes. Only the installed Russian and previously inventoried
+English native strings have been inspected; the other test strings are synthetic. Gameplay and other
+language packs still need verification. This build remains a pre-release.
+
 ## Version 0.8.5
 
 Controller use now waits for 250 ms of native game time for ground weapon swapping, new weapon pickup, recovery of a thrown throwing knife, intelligence pickup and breach activation. This matches the inspected Xbox `g_useholdtime` default. Four rules cover the five scenarios because the two ground weapon actions share the native item route. The same catalog controls action eligibility and localized hold prompts; see [the architecture and extension guide](use-hold.md).

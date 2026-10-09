@@ -34,6 +34,12 @@ The audited weapon rules also permit an implicit instruction prefix. In the Russ
 
 Already-correct Hold text is preserved. A translation with missing, ambiguous or incompatible templates retains its original instruction; the hold behavior still applies. The test suite covers prefix and suffix instructions, multiple locales and markup variations. Actual language packs still require gameplay verification.
 
+From 0.8.7, ground weapon and throwing knife hints additionally try the current locale's prone/crouch
+Hold reference pair. When those templates are compatible, weapon swap and pickup use the complete
+pickup action wording with the shorter Hold instruction. The original button slot is retained, and the
+engine still appends the weapon name. Only the two weapon prompt keys participate; incompatible
+translations retain the previous plant/defuse-based conversion. Other use scenarios keep their action text.
+
 ## Adding a scenario
 
 1. Verify that it uses the timed entity-use route, and establish its native target type, discriminators, prompt key and console timing.
