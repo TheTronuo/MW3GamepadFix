@@ -88,7 +88,8 @@ void MenuController::begin_footer_frame(int local_client) noexcept {
 }
 bool MenuController::replaced_footer(void* item) const noexcept {
     // A disconnect or focus loss restores the original UI immediately.
-    if (!item || !context_.input.monitor().snapshot().connected || current_menu() != footer_menu_)
+    if (!footer_menu_ || footers_.empty() || !item ||
+        !context_.input.monitor().snapshot().connected || current_menu() != footer_menu_)
         return false;
     DWORD process{};
     GetWindowThreadProcessId(GetForegroundWindow(), &process);

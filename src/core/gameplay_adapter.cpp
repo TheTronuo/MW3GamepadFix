@@ -37,6 +37,7 @@ GameplayOutput GameplayAdapter::update(const InputSnapshot& input, bool active) 
             output.events[output.count++] = {i, down};
     }
     held_ = wanted;
+    output.controls = wanted;
     const auto left = xbox_stick(input.pad.left_stick), right = xbox_stick(input.pad.right_stick);
     if (!left.x && !left.y)
         left_blocked_ = false;

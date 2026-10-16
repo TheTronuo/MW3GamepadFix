@@ -68,14 +68,19 @@ CameraDelta StickCamera::update(Stick processed, const CameraContext& context,
     if (!std::isfinite(processed.x) || !std::isfinite(processed.y) || !std::isfinite(context.seconds) ||
         context.seconds <= 0 || context.seconds > 1 || !std::isfinite(settings.sensitivity) ||
         settings.sensitivity < .1f || settings.sensitivity > 4 || !std::isfinite(context.ads) ||
-        !std::isfinite(context.fov_scale) || context.fov_scale <= 0) {
+        !std::isfinite(context.fov_scale) || context.fov_scale <= 0 ||
+        !std::isfinite(context.pitch_scale) || !std::isfinite(context.yaw_scale) ||
+        context.pitch_scale < 0 || context.yaw_scale < 0 ||
+        !std::isfinite(context.pitch_resistance) || !std::isfinite(context.yaw_resistance)) {
         reset();
         return {};
     }
-    const auto input = xbox_view_curve(processed);
+    auto input = xbox_view_curve(processed);
+    input.y *= std::clamp(context.pitch_resistance, 0.0f, 1.0f);
+    input.x *= std::clamp(context.yaw_resistance, 0.0f, 1.0f);
     const float ads = std::clamp(context.ads, 0.0f, 1.0f);
-    float pitch_rate = (90 - 35 * ads) * context.fov_scale * settings.sensitivity;
-    float yaw_rate = (260 - 170 * ads) * context.fov_scale * settings.sensitivity;
+    float pitch_rate = (90 - 35 * ads) * context.fov_scale * context.pitch_scale * settings.sensitivity;
+    float yaw_rate = (260 - 170 * ads) * context.fov_scale * context.yaw_scale * settings.sensitivity;
     if (std::isfinite(context.pitch_cap) && context.pitch_cap > 0)
         pitch_rate = std::min(pitch_rate, context.pitch_cap);
     if (std::isfinite(context.yaw_cap) && context.yaw_cap > 0)

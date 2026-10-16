@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(MW3GamepadFix VERSION 0.8.8 LANGUAGES C CXX RC)
+project(MW3GamepadFix VERSION 0.8.9 LANGUAGES C CXX RC)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if(NOT WIN32 OR NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -33,6 +33,7 @@ add_library(mw3gf_core STATIC
     src/core/gameplay_adapter.cpp
     src/core/gameplay_prompts.cpp
     src/core/stick_camera.cpp
+    src/core/console_aim.cpp
     src/core/use_policy.cpp
     src/core/prone_prompt.cpp
     src/core/mortar_prompt.cpp
@@ -70,12 +71,17 @@ set(MW3GF_GAME_SOURCES
     src/game/prompt_controller.cpp
     src/game/hud_prompt.cpp
     src/game/gameplay_controller.cpp
+    src/game/console_camera.cpp
     src/game/remote_control.cpp
     src/game/use_hold.cpp
     src/game/menu_controller.cpp
     src/game/menu_actions.cpp
 )
 add_library(mw3gf_game OBJECT ${MW3GF_GAME_SOURCES})
+option(MW3GF_PROFILE "Collect diagnostic hook timings in the runtime log" OFF)
+if(MW3GF_PROFILE)
+    target_compile_definitions(mw3gf_game PRIVATE MW3GF_PROFILE=1)
+endif()
 target_link_libraries(mw3gf_game PRIVATE mw3gf_input mw3gf_platform minhook user32 d3d9)
 add_library(MW3GamepadFixASI SHARED
     src/plugin/entry.cpp
@@ -133,6 +139,14 @@ if(BUILD_TESTING)
     mw3gf_add_test(mw3gf_camera_tests stick_camera
         SOURCES tests/stick_camera_tests.cpp
         LIBRARIES mw3gf_core)
+    mw3gf_add_test(mw3gf_console_aim_tests console_aim_xbox
+        SOURCES tests/console_aim_tests.cpp
+        LIBRARIES mw3gf_core
+        ARGS ${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/console-aim-xbox.tsv)
+    mw3gf_add_test(mw3gf_console_turn_tests console_turn_xbox
+        SOURCES tests/console_turn_tests.cpp
+        LIBRARIES mw3gf_core
+        ARGS ${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/console-turn-xbox.tsv)
     mw3gf_add_test(mw3gf_remote_tests remote_control
         SOURCES tests/remote_control_tests.cpp src/game/remote_control.cpp
         LIBRARIES mw3gf_core)

@@ -37,6 +37,7 @@ struct GameplayOutput {
     std::size_t count{};
     std::int8_t forward{}, right{};
     Stick move{}, look{};
+    std::uint32_t controls{}; // Accepted controller holds, excluding transition-blocked buttons.
     bool reset_camera{};
 };
 class GameplayAdapter {

@@ -10,6 +10,9 @@ RuntimeContext::RuntimeContext(HMODULE module, const plugin::StartOptions& optio
       demo(options.demo != 0) {
     logger.write(settings.prompt_style == PromptStyle::ps3 ? "Prompt style: PS3 (independent icons)."
                                                            : "Prompt style: X360 (independent icons).");
+    logger.write("Controller camera: sensitivity=" + std::to_string(settings.camera_settings.sensitivity) +
+                 ", invert_y=" + (settings.camera_settings.invert_y ? "1" : "0") +
+                 ", aim_assist=" + (settings.aim_assist ? "1" : "0") + ".");
     logger.write(
         "Build identity and paint/text/UI-key signatures verified; independent button resource validated.");
 }

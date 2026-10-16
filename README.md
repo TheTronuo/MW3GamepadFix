@@ -43,6 +43,9 @@ Edit `MW3GamepadFix.ini` next to `iw5sp.exe`:
 enabled=1
 backend=xinput
 prompts=x360
+sensitivity=medium
+invert_y=0
+aim_assist=0
 ```
 
 | Setting | Values |
@@ -50,8 +53,17 @@ prompts=x360
 | `enabled` | `1` to enable, `0` to disable |
 | `backend` | `xinput` (default), `gameinput`, or `auto` |
 | `prompts` | `x360` for Xbox icons (default), `ps3` for PlayStation icons |
+| `sensitivity` | Xbox presets: `low`, `medium` (default), `high`, `ultra` |
+| `invert_y` | `0` for normal vertical look (default), `1` for inverted |
+| `aim_assist` | `0` to disable (default), `1` for target slowdown, ADS assistance and tracking; restart after changing |
 
 Restart the game after changing settings. Prompt style is independent of the input backend and game language. XInput-compatible controllers work with the default backend. PlayStation controllers need an XInput mapping tool or the GameInput backend; GameInput requires its Microsoft runtime.
+
+Controller camera handling follows the inspected Xbox 360 default stick layout: radial deadzones,
+response curve, acceleration, weapon-dependent target slowdown, assistance when entering ADS,
+relative-velocity target tracking and resistance near scripted view limits. Scripted camera slowdown
+and native turn caps remain active when target assistance is disabled. See [camera implementation
+and verification limits](docs/controller-camera.md).
 
 ## Credits
 

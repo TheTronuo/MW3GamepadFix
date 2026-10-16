@@ -18,6 +18,7 @@ EngineApi::EngineApi(OriginalFunctions& originals)
     verify(ui_activate_rva, ui_activate_prologue, "ui_activate");
     verify(cinematic_escape_rva, cinematic_escape_prologue, "cinematic_escape");
     verify(mouse_move_rva, mouse_move_prologue, "mouse_move");
+    verify(aim_update_rva, aim_update_prologue, "aim_update");
     verify(remote_move_rva, remote_move_prologue, "remote_move");
     verify(entity_use_rva, entity_use_prologue, "entity_use");
     verify(weapon_class_rva, weapon_class_prologue, "weapon_class");

@@ -10,6 +10,31 @@ a97d2bbc7e495e4cf1a3b7e9a021e25b2c7b461d63f2b88d3cfe8782e8dc1023
 
 The executable hash and hook signatures are checked before hooks are enabled. Other executable builds and multiplayer are unsupported. The mod does not patch game files on disk.
 
+## Version 0.8.9
+
+Controller camera input now runs inside the native aim stage after ADS/FOV preparation. The port adds
+Xbox target slowdown, ADS acquisition/interpolation, relative-velocity lock-on, scripted slowaim,
+view-cone resistance and previous-target melee acquisition. Movement enters the command before
+camera processing. Sensitivity presets, inversion and an aim-assist toggle are available in `[Input]`.
+Target assistance is off by default, including with older INI files that omit the new key.
+
+Static camera/player memory is validated per block rather than per field or target. Dynamic pointers
+retain their checks. Menu-footer replacement checks return immediately when no footer exists.
+A standalone before/after replay of 24 scenarios (26,400 frames) produced identical camera outputs
+with one native aim call per frame, covering disabled/enabled assistance, scripted slowdown, view
+limits, ADS/melee button transitions and 0/1/64 targets. Synthetic mean camera costs fell from about
+0.10-0.36 ms to 0.006-0.01 ms; these are isolated CPU measurements, not a game FPS benchmark.
+On October 16, 2026, the user reported stable 120 FPS in the tested gameplay after installing the
+optimization with assistance disabled. Diagnostic hook timing is disabled in release builds.
+
+All 19 Release CTest tests pass. Camera tests compare 1,600 aim results and 2,400 curve/turn frames
+with original Xbox PPC instructions, including 30 ADS sequences, and check release, lost targets, disabled assist,
+mode reset, melee gating and prior-target selection. Hook relocation covers the additional native
+aim detour. The native PC melee interpolation/tag lookup remains in use. These checks do not verify
+gameplay feel, every mission's native target list, or full Xbox feature parity. Broad in-game
+comparisons across missions and controller settings remain incomplete. Physical stick feel has
+not been verified by automation. See [implementation details](controller-camera.md).
+
 ## Version 0.8.8
 
 The Warlord mortar entry hint now uses the current locale's Press instruction instead of Hold.

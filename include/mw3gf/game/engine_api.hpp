@@ -10,6 +10,7 @@ using ReadCharacter = unsigned (*)(const char**, int, int);
 using GameFrame = void (*)(int, float);
 using CreateCmd = void* (*)(void*, int);
 using MouseMove = void (*)(void*, float);
+using AimUpdate = void (*)(const void*, void*);
 using RemoteMove = void (*)(int, void*);
 using EntityUse = void (*)(void*, void*);
 using BindingKeys = int (*)(int, const char*, char*);
@@ -37,6 +38,7 @@ struct OriginalFunctions {
     TextCommand text_command{};
     LookupGlyph lookup_glyph{};
     MouseMove mouse_move{};
+    AimUpdate aim_update{};
     RemoteMove remote_move{};
     EntityUse entity_use{};
     HandlePic handle_pic{};

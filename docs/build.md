@@ -15,6 +15,10 @@ python scripts/package_asi.py
 
 The restore scripts download pinned dependencies and verify their SHA256 hashes. The package script restores Ultimate ASI Loader and creates `out/MW3GamepadFix-<version>-ASI.zip`. Build output and dependencies are ignored by Git.
 
+Diagnostic hook timing is off by default (`MW3GF_PROFILE=OFF`). Enable it only for a diagnostic
+build with `-DMW3GF_PROFILE=ON`; its five-second log summaries contain inclusive hook timings
+and must not be added together. Release archives use the default with timing disabled.
+
 `assets/button-icons.bin` and `assets/button-icons-ps3.bin` are the embedded button resources. Repacking them is optional and requires Pillow plus separately supplied source images and metrics:
 
 ```powershell

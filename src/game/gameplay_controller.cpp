@@ -112,6 +112,7 @@ bool GameplayController::defer_use(const void* player, const void* target,
     }
 }
 void GameplayController::add_camera(void* command, float seconds) noexcept {
+    camera_command_ = nullptr;
     if (!context_.settings.camera || !command || !gameplay_active() ||
         !context_.input.monitor().snapshot().connected) {
         camera_.reset();
@@ -128,29 +129,14 @@ void GameplayController::add_camera(void* command, float seconds) noexcept {
         camera_.reset();
         remote_camera_ = false;
     }
-    const auto* state = context_.engine.address(camera_state_rva);
-    CameraContext context;
-    context.seconds = seconds; // The original builder supplies scaled game seconds.
-    if (read_field<std::uint8_t>(state, layout::camera::initialized)) {
-        context.fov_scale = read_field<float>(state, layout::camera::fov_scale);
-        context.ads = read_field<float>(state, layout::camera::ads);
-        const auto buttons = read_field<unsigned>(command, layout::command::buttons);
-        const auto force_ads = context_.engine.function<bool (*)(int)>(forced_ads_rva);
-        if (((read_field<unsigned>(state, layout::camera::flags) & layout::camera::forced_ads_modes) &&
-             (buttons & layout::command::ads_button)) ||
-            force_ads(0))
-            context.ads = 1;
-    }
-    context.pitch_cap = read_field<float>(client, layout::client::pitch_cap);
-    context.yaw_cap = read_field<float>(client, layout::client::yaw_cap);
-    auto* angles = static_cast<float*>(context_.engine.address(client_state_rva + layout::client::angles));
-    if (!std::isfinite(angles[0]) || !std::isfinite(angles[1])) {
+    if (!std::isfinite(seconds) || seconds <= 0 || seconds > 1 ||
+        !context_.engine.read<std::uint8_t>(camera_state_rva + layout::camera::initialized)) {
         camera_.reset();
         return;
     }
-    const auto delta = camera_.update(movement_.look, context, context_.settings.camera_settings);
-    angles[0] += delta.pitch;
-    angles[1] += delta.yaw;
+    // Native MouseMove prepares ADS, FOV and target state, then invokes the aim hook.
+    // Keep this command scoped so server/other-client calls use the untouched PC path.
+    camera_command_ = command;
     // PC special modes consume raw analog look in +20/+21, with mouse signs.
     // +3E/+3F belongs to RemoteControlMove and is handled separately.
     const auto modes = read_field<unsigned>(client, layout::client::special_modes);
@@ -162,10 +148,29 @@ void GameplayController::add_camera(void* command, float seconds) noexcept {
         bytes[layout::command::yaw] = merge_movement(
             bytes[layout::command::yaw], static_cast<std::int8_t>(std::trunc(movement_.look.x * 127)));
     }
-    if (!camera_seen_ && (delta.pitch || delta.yaw)) {
+}
+void GameplayController::apply_aim(const void* raw_input, void* raw_output) noexcept {
+    const auto original = context_.engine.originals().aim_update;
+    if (!camera_command_ || !raw_input || !raw_output) {
+        original(raw_input, raw_output);
+        return;
+    }
+    auto input = read_field<NativeAimInput>(raw_input, 0);
+    if (input.local_client != 0) { original(raw_input, raw_output); return; }
+    auto& output = *static_cast<NativeAimOutput*>(raw_output);
+    // The PC wrapper has no stick caps in its input; use the same native client caps as Xbox.
+    input.pitch_cap = context_.engine.read<float>(client_state_rva + layout::client::pitch_cap);
+    input.yaw_cap = context_.engine.read<float>(client_state_rva + layout::client::yaw_cap);
+    const float radius = std::hypot(movement_.move.x, movement_.move.y);
+    const Stick virtual_move{movement_.move.x * radius, movement_.move.y * radius};
+    const unsigned controller_buttons = ((movement_.controls & control_lt) ? 0x800U : 0U) |
+                                        ((movement_.controls & bit(Button::rs)) ? 4U : 0U);
+    camera_.update(context_.engine, input, output, movement_.look, virtual_move,
+                   context_.settings.camera_settings, context_.settings.aim_assist, controller_buttons);
+    if (!camera_seen_) {
         try {
-            context_.logger.write("Stage 3 camera active: native seconds, Xbox graph 3/rate ramp, native "
-                                  "ADS/FOV/caps; float angles before packing.");
+            context_.logger.write("Console camera active: Xbox turn/slowaim/target slowdown, ADS auto-aim, "
+                                  "melee acquisition, lock-on and view-cone resistance; native timing.");
         } catch (...) {
         }
         camera_seen_ = true;
@@ -192,6 +197,7 @@ void GameplayController::add_remote_stick(int local_client, void* command) noexc
 }
 void GameplayController::release_gameplay() noexcept {
     prompts_.update_mode(false);
+    camera_command_ = nullptr;
     movement_ = {};
     camera_.reset();
     try {

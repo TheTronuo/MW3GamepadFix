@@ -30,17 +30,23 @@ int main() {
             const auto down = adapter.update(pad, true);
             require(down.count == 1 && down.events[0].binding == i && down.events[0].down,
                     "Every input gets its own down");
-            require(adapter.update(pad, true).count == 0, "Holds don't repeat discrete actions");
+            const auto held = adapter.update(pad, true);
+            require(down.controls == b.control && held.controls == b.control,
+                    "Accepted controller holds retain their source during camera processing");
+            require(held.count == 0, "Holds don't repeat discrete actions");
             pad.pad = {};
             const auto up = adapter.update(pad, true);
             require(up.count == (b.up ? 1u : 0u), "Paired native release");
+            require(up.controls == 0, "Released controller button cannot acquire an aim target");
             require(gameplay_glyph(b.command) == b.glyph, "Prompt follows real binding");
         }
         pad.pad.right_trigger = 1;
         (void)adapter.update(pad, true);
         auto release = adapter.update(pad, false);
         require(release.count == 1 && !release.events[0].down, "Menu entry releases fire");
-        require(adapter.update(pad, true).count == 0, "Held fire cannot leak out of menu");
+        const auto resumed = adapter.update(pad, true);
+        require(resumed.count == 0 && resumed.controls == 0 && release.controls == 0,
+                "Held buttons cannot leak actions or aim assistance out of menu");
         pad.pad = {};
         (void)adapter.update(pad, true);
         pad.pad.left_stick = {0, 1};

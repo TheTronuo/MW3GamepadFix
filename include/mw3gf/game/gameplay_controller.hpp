@@ -4,6 +4,7 @@
 #include "mw3gf/game/button_icons.hpp"
 #include "mw3gf/game/prompt_controller.hpp"
 #include "mw3gf/game/runtime_context.hpp"
+#include "mw3gf/game/console_camera.hpp"
 #include <atomic>
 namespace mw3gf::game {
 class GameplayController {
@@ -15,6 +16,8 @@ class GameplayController {
     void pump_gameplay(bool running) noexcept;
     void add_movement(void* cmd, int local_client) noexcept;
     void add_camera(void* command, float seconds) noexcept;
+    void finish_camera() noexcept { camera_command_ = nullptr; }
+    void apply_aim(const void* input, void* output) noexcept;
     void add_remote_stick(int local_client, void* command) noexcept;
     void record_use_command(const void* command, int local_client) noexcept;
     bool defer_use(const void* player, const void* target, std::uintptr_t caller_rva) noexcept;
@@ -28,7 +31,8 @@ class GameplayController {
     GameplayAdapter gameplay_adapter_;
     CinematicSkip cinematic_skip_;
     GameplayOutput movement_;
-    StickCamera camera_;
+    ConsoleCamera camera_;
+    void* camera_command_{};
     std::atomic_bool release_pending_{};
     std::atomic_bool controller_use_source_{};
     UseHold use_hold_;

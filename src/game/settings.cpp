@@ -55,6 +55,17 @@ ModSettings read_settings(const std::filesystem::path& path) {
                 result.prompt_style = PromptStyle::ps3;
             else
                 throw std::runtime_error("Input prompts must be x360 or ps3");
+        } else if (key == "sensitivity") {
+            if (value == "low") result.camera_settings.sensitivity = .6f;
+            else if (value == "medium") result.camera_settings.sensitivity = 1;
+            else if (value == "high") result.camera_settings.sensitivity = 1.8f;
+            else if (value == "ultra") result.camera_settings.sensitivity = 4;
+            else throw std::runtime_error("Input sensitivity must be low, medium, high or ultra");
+        } else if (key == "invert_y" || key == "aim_assist") {
+            if (value != "0" && value != "1")
+                throw std::runtime_error("Input invert_y and aim_assist must be 0 or 1");
+            if (key == "invert_y") result.camera_settings.invert_y = value == "1";
+            else result.aim_assist = value == "1";
         }
     }
     return result;

@@ -1,15 +1,14 @@
-# MW3GamepadFix 0.8.8
+# MW3GamepadFix 0.8.9
 
 Gamepad support for Call of Duty: Modern Warfare 3 (2011), single-player on 64-bit Windows.
 This is a pre-release; full campaign verification is ongoing.
 
-Version 0.8.8 corrects the mortar entry hint to Press, matching its immediate input.
-It uses a shorter localized Hold pickup instruction for both weapon
-pickup and swapping when the game's translation templates are compatible.
-It also displays the game's localized Hold instruction for controller prone
-hints in Warlord, Prague, Castle and the shared prone templates. It also includes
-the 250 ms controller hold for weapon pickup, thrown knife recovery, intelligence
-pickup and breach activation introduced in 0.8.5.
+Version 0.8.9 improves controller performance by avoiding repeated memory checks
+in camera processing and unnecessary menu-footer checks during gameplay.
+It updates the camera's native ADS/FOV processing, scripted slowdown and view limits,
+adds sensitivity presets and vertical inversion, and offers optional Xbox-style
+target slowdown, ADS assistance and tracking. Aim assistance is disabled by default.
+Earlier localized prompt corrections and controller hold actions are retained.
 
 ## Install
 
@@ -28,6 +27,9 @@ Edit MW3GamepadFix.ini, then restart the game.
 - enabled=1 enables the mod; enabled=0 disables it.
 - backend=xinput is the default. gameinput and auto are also available.
 - prompts=x360 selects Xbox icons; prompts=ps3 selects PlayStation icons.
+- sensitivity=medium is the default; low, high and ultra are also available.
+- invert_y=0 is normal vertical look; invert_y=1 inverts it.
+- aim_assist=0 disables target assistance (default); aim_assist=1 enables it.
 GameInput requires its Microsoft runtime. Prompt style is independent of the backend and game language.
 
 ## Uninstall

@@ -9,7 +9,8 @@ struct ModSettings {
     bool enabled{true};
     plugin::BackendSelection backend{plugin::BackendSelection::xinput};
     PromptStyle prompt_style{PromptStyle::x360};
-    // Internal defaults; only input backend, activation and prompt style are configurable.
+    bool aim_assist{};
+    // Internal UI defaults.
     int x_percent{4}, y_percent{93}, height_percent{3};
     unsigned code_page{1252};
     bool show_axes{}, show_debug{}, navigation{true}, prompts{true};

@@ -34,7 +34,7 @@ int main() {
         require(defaults.navigation && defaults.gameplay && defaults.camera && defaults.code_page == 1252,
                 "Default settings changed");
         require(defaults.enabled && defaults.backend == mw3gf::plugin::BackendSelection::xinput &&
-                    defaults.prompt_style == PromptStyle::x360,
+                    defaults.prompt_style == PromptStyle::x360 && !defaults.aim_assist,
                 "Default input configuration changed");
         file.write("\xEF\xBB\xBF[Input]\r\n enabled = 0 \r\n backend = gameinput ; comment\r\n"
                    "prompts = ps3\r\n");
@@ -50,10 +50,27 @@ int main() {
                     automatic.prompt_style == PromptStyle::x360,
                 "Automatic backend and X360 selection parse");
         require(automatic.navigation && automatic.gameplay && automatic.camera &&
-                    automatic.camera_settings.sensitivity == 1 && !automatic.camera_settings.invert_y,
+                    automatic.camera_settings.sensitivity == 1 && !automatic.camera_settings.invert_y &&
+                    !automatic.aim_assist,
                 "Removed configuration sections cannot change runtime defaults");
+        file.write("[Input]\nenabled=1\nbackend=xinput\nprompts=x360\n");
+        require(!read_settings(file.path).aim_assist, "Older INI cannot silently enable target assistance");
+        file.write("[Input]\naim_assist=1\n");
+        require(read_settings(file.path).aim_assist, "Target assistance requires an explicit opt-in");
+        file.write("[Input]\nsensitivity=low\ninvert_y=1\naim_assist=0\n");
+        const auto console = read_settings(file.path);
+        require(console.camera_settings.sensitivity == .6f && console.camera_settings.invert_y &&
+                    !console.aim_assist, "Xbox low sensitivity, inversion and assist setting");
+        for (const auto preset : {"medium", "high", "ultra"}) {
+            file.write((std::string("[Input]\nsensitivity=") + preset + "\n").c_str());
+            const auto value = read_settings(file.path).camera_settings.sensitivity;
+            require(value == (std::string_view(preset) == "medium" ? 1 :
+                              std::string_view(preset) == "high" ? 1.8f : 4), "Xbox sensitivity preset");
+        }
         for (const char* invalid : {"[Input]\nenabled=2\n", "[Input]\nbackend=unknown\n",
-                                    "[Input]\nprompts=ps4\n", "[Input]\nprompts=\n"}) {
+                                    "[Input]\nprompts=ps4\n", "[Input]\nprompts=\n",
+                                    "[Input]\nsensitivity=5\n", "[Input]\ninvert_y=2\n",
+                                    "[Input]\naim_assist=yes\n"}) {
             file.write(invalid);
             bool rejected{};
             try {
@@ -63,7 +80,7 @@ int main() {
             }
             require(rejected, "Invalid public setting silently accepted");
         }
-        std::cout << "Three-key INI configuration verified\n";
+        std::cout << "Input configuration and Xbox sensitivity/inversion/assist verified\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';

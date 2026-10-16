@@ -11,6 +11,9 @@ struct CameraSettings {
 };
 struct CameraContext {
     float seconds{}, ads{}, fov_scale{1.0f}, pitch_cap{}, yaw_cap{};
+    float pitch_scale{1}, yaw_scale{1};
+    // Multipliers of the curved axes, before turn-rate acceleration.
+    float pitch_resistance{1}, yaw_resistance{1};
 };
 struct CameraDelta {
     float pitch{}, yaw{};

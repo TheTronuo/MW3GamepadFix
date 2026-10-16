@@ -1,9 +1,11 @@
 #include "native_hooks.hpp"
+#include "performance_profile.hpp"
 #include "mw3gf/platform/windows.hpp"
 #include <intrin.h>
 namespace mw3gf::game::detail {
 namespace {
 void hooked_menu_paint(int local_client) {
+    MW3GF_TIME(menu_paint);
     if (enabled.load(std::memory_order_acquire))
         runtime->menu().begin_footer_frame(local_client);
     originals.menu_paint(local_client);
@@ -11,36 +13,57 @@ void hooked_menu_paint(int local_client) {
         runtime->menu().paint(local_client);
 }
 void hooked_item_paint(void* context, void* placement, void* item) {
+    MW3GF_TIME(item_paint);
     if (enabled.load(std::memory_order_acquire) && runtime->menu().replaced_footer(item))
         return;
     originals.item_paint(context, placement, item);
 }
 int hooked_focusable(int local_client, void* item) {
+    MW3GF_TIME(focusable);
     if (local_client == 0 && enabled.load(std::memory_order_acquire) && runtime->menu().replaced_footer(item))
         return 0;
     return originals.focusable(local_client, item);
 }
 void hooked_game_frame(int msec, float fraction) {
-    runtime->gameplay().pump_gameplay(enabled.load(std::memory_order_acquire));
+    profile_report(runtime->context().logger, runtime->context().input.monitor().snapshot().connected);
+    {
+        MW3GF_TIME(input);
+        runtime->gameplay().pump_gameplay(enabled.load(std::memory_order_acquire));
+    }
     // Menu callbacks can synchronously shut down the renderer. Dispatch them
     // from the client frame before drawing, never from UI painting.
-    if (enabled.load(std::memory_order_acquire))
+    if (enabled.load(std::memory_order_acquire)) {
+        MW3GF_TIME(menu_input);
         runtime->menu().pump_input();
-    originals.game_frame(msec, fraction);
+    }
+    {
+        MW3GF_TIME(native_frame);
+        originals.game_frame(msec, fraction);
+    }
 }
 void* hooked_create_cmd(void* command, int local_client) {
     void* result = originals.create_cmd(command, local_client);
-    if (enabled.load(std::memory_order_acquire))
-        runtime->gameplay().add_movement(result, local_client);
     runtime->gameplay().record_use_command(result, local_client);
     return result;
 }
 void hooked_mouse_move(void* command, float seconds) {
-    if (enabled.load(std::memory_order_acquire))
+    MW3GF_TIME(camera);
+    if (enabled.load(std::memory_order_acquire)) {
+        runtime->gameplay().add_movement(command, 0);
         runtime->gameplay().add_camera(command, seconds);
+    }
     originals.mouse_move(command, seconds);
+    runtime->gameplay().finish_camera();
+}
+void hooked_aim_update(const void* input, void* output) {
+    MW3GF_TIME(aim);
+    if (enabled.load(std::memory_order_acquire))
+        runtime->gameplay().apply_aim(input, output);
+    else
+        originals.aim_update(input, output);
 }
 void hooked_remote_move(int local_client, void* command) {
+    MW3GF_TIME(remote);
     originals.remote_move(local_client, command);
     if (enabled.load(std::memory_order_acquire))
         runtime->gameplay().add_remote_stick(local_client, command);
@@ -54,6 +77,7 @@ void hooked_entity_use(void* player, void* target) {
     originals.entity_use(player, target);
 }
 int hooked_binding_keys(int client, const char* command, char* output) {
+    MW3GF_TIME(binding);
     if (enabled.load(std::memory_order_acquire)) {
         const int count = runtime->prompts().binding_keys(client, command, output);
         if (count >= 0)
@@ -62,6 +86,7 @@ int hooked_binding_keys(int client, const char* command, char* output) {
     return originals.binding_keys(client, command, output);
 }
 const char* hooked_localized_text(const char* key) {
+    MW3GF_TIME(localized);
     const char* original = originals.localized_text(key);
     return enabled.load(std::memory_order_acquire) ? runtime->prompts().localized(key, original) : original;
 }
@@ -75,40 +100,48 @@ void* hooked_find_asset(int type, const char* key, int flags) {
 }
 void* hooked_text_command(const char* text, int max_chars, NativeFont* font, float x, float y, float xs,
                           float ys, float rotation, const float* color, int style, int cursor, bool flag) {
+    MW3GF_TIME(text_submit);
     if (enabled.load(std::memory_order_acquire))
         return runtime->prompts().text_command(text, max_chars, font, x, y, xs, ys, rotation, color, style,
                                                cursor, flag);
     return originals.text_command(text, max_chars, font, x, y, xs, ys, rotation, color, style, cursor, flag);
 }
 Glyph* hooked_lookup_glyph(NativeFont* font, unsigned code) {
+    MW3GF_TIME(glyph);
     return enabled.load(std::memory_order_acquire) ? runtime->prompts().glyph(font, code)
                                                    : originals.lookup_glyph(font, code);
 }
 void hooked_handle_pic(void* placement, float x, float y, float width, float height, int horizontal,
                        int vertical, const float* color, void* material) {
+    MW3GF_TIME(handle_pic);
     if (enabled.load(std::memory_order_acquire) && runtime->menu().hide_cursor(material))
         return;
     originals.handle_pic(placement, x, y, width, height, horizontal, vertical, color, material);
 }
 void hooked_render_text(void* state) {
+    MW3GF_TIME(text_render);
     // Finish already queued button markers even after Stop/disconnect.
     runtime->prompts().render_text(state);
 }
 void* hooked_register_material(const char* name, int flags) {
+    MW3GF_TIME(material);
     if (void* material = runtime->prompts().prompt_material(name))
         return material;
     return originals.register_material(name, flags);
 }
 int hooked_text_width(const char* text, int max_chars, NativeFont* font) {
+    MW3GF_TIME(text_width);
     return enabled.load(std::memory_order_acquire) ? runtime->prompts().measured_width(text, max_chars, font)
                                                    : originals.text_width(text, max_chars, font);
 }
 int hooked_decoded_text_width(const char* text, int max_chars, NativeFont* font, int decode_mode) {
+    MW3GF_TIME(decoded_width);
     return enabled.load(std::memory_order_acquire)
                ? runtime->prompts().measured_width(text, max_chars, font, decode_mode)
                : originals.decoded_text_width(text, max_chars, font, decode_mode);
 }
 int hooked_text_count(const char* text) {
+    MW3GF_TIME(text_count);
     return runtime->prompts().visible_characters(text);
 }
 void hooked_renderer_release(int mode) {
@@ -134,6 +167,7 @@ void install_hooks(ModRuntime& instance) {
     hooks.add(HookId::lookup_glyph, engine.address(lookup_glyph_rva), &hooked_lookup_glyph,
               originals.lookup_glyph);
     hooks.add(HookId::mouse_move, engine.address(mouse_move_rva), &hooked_mouse_move, originals.mouse_move);
+    hooks.add(HookId::aim_update, engine.address(aim_update_rva), &hooked_aim_update, originals.aim_update);
     hooks.add(HookId::remote_move, engine.address(remote_move_rva), &hooked_remote_move,
               originals.remote_move);
     hooks.add(HookId::entity_use, engine.address(entity_use_rva), &hooked_entity_use, originals.entity_use);
